@@ -7,7 +7,12 @@ from datetime import datetime
 
 
 # 输入研究主题
-keyword = input("请输入研究主题：")
+import sys
+
+if len(sys.argv) > 1:
+    keyword = sys.argv[1]
+else:
+    keyword = input("请输入研究主题：")
 
 
 results = []
