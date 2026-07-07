@@ -221,3 +221,4 @@ __marimo__/
 *.jpg
 result.png
 test_ai.py
+logs/
