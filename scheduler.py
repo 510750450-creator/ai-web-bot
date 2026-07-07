@@ -1,7 +1,31 @@
 import time
 import subprocess
 import sys
+import os
 from datetime import datetime
+
+
+os.makedirs(
+    "logs",
+    exist_ok=True
+)
+
+
+def write_log(message):
+
+    filename = datetime.now().strftime(
+        "logs/%Y-%m-%d.log"
+    )
+
+    with open(
+        filename,
+        "a",
+        encoding="utf-8"
+    ) as f:
+
+        f.write(
+            f"{datetime.now()} - {message}\n"
+        )
 
 
 while True:
@@ -14,49 +38,67 @@ while True:
     )
 
 
-    # 测试时使用 True
-    # 正式运行改回：
-    # if now.hour == 9 and now.minute == 0:
+    # 测试阶段
+    # 完成测试后改回每天9点
+    if True:
 
-    if now.hour == 9 and now.minute == 0:
 
         print("开始自动研究任务")
 
-
-        # 运行搜索任务
-        subprocess.run(
-            [
-                sys.executable,
-                "main.py",
-                "AI自动化赚钱项目"
-            ]
+        write_log(
+            "开始自动研究任务"
         )
 
 
-        # 生成报告
-        subprocess.run(
-            [
-                sys.executable,
-                "generate_report.py"
-            ]
-        )
+        try:
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    "main.py",
+                    "AI自动化赚钱项目"
+                ]
+            )
 
 
-        # 项目评分
-        subprocess.run(
-            [
-                sys.executable,
-                "score_projects.py"
-            ]
-        )
+            subprocess.run(
+                [
+                    sys.executable,
+                    "generate_report.py"
+                ]
+            )
 
 
-        print(
-            "任务完成"
-        )
+            subprocess.run(
+                [
+                    sys.executable,
+                    "score_projects.py"
+                ]
+            )
 
 
-        # 防止一直重复运行
+            write_log(
+                "任务完成"
+            )
+
+
+            print(
+                "任务完成"
+            )
+
+
+        except Exception as e:
+
+            write_log(
+                f"错误: {e}"
+            )
+
+            print(
+                "发生错误:",
+                e
+            )
+
+
         time.sleep(70)
 
 
