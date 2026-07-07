@@ -17,6 +17,16 @@ with sync_playwright() as p:
 
     page.wait_for_timeout(5000)
 
-    page.screenshot(path="result.png")
+    # 获取搜索结果标题
+    titles = page.locator("li.b_algo h2").all_inner_texts()
+
+    print("\n搜索结果：")
+    for i, title in enumerate(titles[:5], 1):
+        print(f"{i}. {title}")
+
+    # 保存结果
+    with open("result.txt", "w", encoding="utf-8") as f:
+        for i, title in enumerate(titles[:5], 1):
+            f.write(f"{i}. {title}\n")
 
     browser.close()
