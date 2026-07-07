@@ -1,9 +1,10 @@
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 import requests
+import json
 
 
-keyword = input("请输入搜索内容：")
+keyword = input("请输入研究主题：")
 
 
 with sync_playwright() as p:
@@ -27,69 +28,77 @@ with sync_playwright() as p:
     # 获取搜索结果
     results = page.locator("li.b_algo")
 
-    links = []
+    articles = []
+
 
     for r in results.all()[:5]:
 
         try:
             title = r.locator("h2").inner_text()
-            link = r.locator("a").first.get_attribute("href")
+            url = r.locator("h2 a").get_attribute("href")
 
-            if title and link:
+
+            if title and url:
+
+                print("\n正在读取：")
                 print(title)
-                print(link)
-                print()
-
-                links.append(link)
-
-        except:
-            pass
+                print(url)
 
 
-    # 打开第一个网页
-    if links:
-
-        url = links[0]
-
-        print("正在读取：")
-        print(url)
+                headers = {
+                    "User-Agent": "Mozilla/5.0"
+                }
 
 
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+                response = requests.get(
+                    url,
+                    headers=headers,
+                    timeout=10
+                )
 
 
-        response = requests.get(
-            url,
-            headers=headers,
-            timeout=10
+                soup = BeautifulSoup(
+                    response.text,
+                    "html.parser"
+                )
+
+
+                content = soup.get_text(
+                    "\n",
+                    strip=True
+                )
+
+
+                articles.append(
+                    {
+                        "title": title,
+                        "url": url,
+                        "content": content[:3000]
+                    }
+                )
+
+
+        except Exception as e:
+            print("跳过：", e)
+
+
+    # 保存JSON
+
+    with open(
+        "research.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            articles,
+            f,
+            ensure_ascii=False,
+            indent=2
         )
 
 
-        soup = BeautifulSoup(
-            response.text,
-            "html.parser"
-        )
-
-
-        text = soup.get_text(
-            "\n",
-            strip=True
-        )
-
-
-        # 保存文章内容
-        with open(
-            "article.txt",
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            f.write(text)
-
-
-        print("文章已保存 article.txt")
+    print("\n完成！保存 research.json")
 
 
     browser.close()
